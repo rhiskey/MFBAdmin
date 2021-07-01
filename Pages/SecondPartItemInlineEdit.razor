@@ -1,0 +1,34 @@
+﻿@page "/SecondPartItemInline"
+@*@attribute [Authorize(Roles = "admin, superuser")]*@
+@namespace MFBAdminMBlazorServer.Pages
+
+@using MFBAdminMBlazorServer.Shared
+
+@using MFBAdminMBlazorServer.Models
+@inject MFBAdminMBlazorServer.Services.ISecondPartItemService spiService
+
+
+
+
+<SecondPartTable InputSecondPartItemsList="spis" TableTitle="@Title"></SecondPartTable>
+
+
+@code {
+
+  private List<MfbDisclosureSecondPartItem> spis = new List<MfbDisclosureSecondPartItem>();
+  private string Title = "Элементы второй части";
+
+  protected override async Task OnInitializedAsync()
+  {
+    GetSecondPartItems();
+  }
+
+  private List<MfbDisclosureSecondPartItem> GetSecondPartItems()
+  {
+    var tempSpis = spiService.GetSecondPartItems();
+    var query = tempSpis.GroupBy(e => e.ItemCode).Select(g => g.Last()).Distinct().ToList();
+    spis = query;
+    return query;
+  }
+
+}

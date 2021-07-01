@@ -1,0 +1,125 @@
+﻿@page "/secondpartitem"
+
+@using MFBAdminMBlazorServer.Models
+@inject MFBAdminMBlazorServer.Services.ISecondPartItemService spiService
+@inject MudBlazor.ISnackbar snackBar
+
+<h1>Пункты второй части</h1>
+
+Управление пунктами
+
+<MudCard Elevation="25">
+  <MudCardHeader>
+    <CardHeaderContent>
+      <MudText Typo="Typo.h6">Add / Edit Second part items</MudText>
+    </CardHeaderContent>
+  </MudCardHeader>
+  <MudCardContent>
+    <MudTextField @bind-Value="spi.RegulationCode" Label="Regulation Code" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudDatePicker @bind-Value="spi.PublishMoment" Label="PublishMoment" Variant="Variant.Text" Margin="Margin.Normal"></MudDatePicker>
+    <MudDatePicker @bind-Value="spi.DateFrom" Label="DateFrom" Variant="Variant.Text" Margin="Margin.Normal"></MudDatePicker>
+    <MudDatePicker @bind-Value="spi.DateTo" Label="DateTo" Variant="Variant.Text" Margin="Margin.Normal"></MudDatePicker>
+    <MudTextField @bind-Value="spi.Frequency" Label="Frequency" InputType="@MudBlazor.InputType.Number" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="spi.Seq" Label="Seq" InputType="@MudBlazor.InputType.Number" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="spi.ItemCode" Label="ItemCode" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="spi.ItemNumber" Label="ItemNumber" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="spi.ItemDescription" Label="ItemDescription" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="spi.ItemType" Label="ItemType" InputType="@MudBlazor.InputType.Number" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="spi.ItemValue" Label="ItemValue" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="spi.ExtraDetails" Label="ExtraDetails" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="spi.Status" Label="Status" InputType="@MudBlazor.InputType.Number" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <br />
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save Second Part Item</MudButton>
+  </MudCardContent>
+</MudCard>
+
+<br />
+<MudTable Elevation="25" Items="GetSecondPartItems()" Filter="new Func<MfbDisclosureSecondPartItem, bool>(Search)" @bind-spi="spi">
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">Second Part Items</MudText>
+    <MudToolBarSpacer />
+    <MudTextField @bind-Value="searchString" Placeholder="Search for Second Part Items..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>Regulation Code</MudTh>
+    <MudTh>PublishMoment</MudTh>
+    <MudTh>DateFrom</MudTh>
+    <MudTh>DateTo</MudTh>
+    <MudTh>Frequency</MudTh>
+    <MudTh>Seq</MudTh>
+    <MudTh>ItemCode</MudTh>
+    <MudTh>ItemNumber</MudTh>
+    <MudTh>ItemDescription</MudTh>
+    <MudTh>ItemType</MudTh>
+    <MudTh>ItemValue</MudTh>
+    <MudTh>ExtraDetails</MudTh>
+    <MudTh>Status</MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd DataLabel="RegulationCode">@context.RegulationCode</MudTd>
+    <MudTd DataLabel="PublishMoment">@context.PublishMoment</MudTd>
+    <MudTd DataLabel="DateFrom">@context.DateFrom</MudTd>
+    <MudTd DataLabel="DateTo">@context.DateTo</MudTd>
+    <MudTd DataLabel="Frequency">@context.Frequency</MudTd>
+    <MudTd DataLabel="Seq">@context.Seq</MudTd>
+    <MudTd DataLabel="ItemCode">@context.ItemCode</MudTd>
+    <MudTd DataLabel="ItemNumber">@context.ItemNumber</MudTd>
+    <MudTd DataLabel="ItemDescription">@context.ItemDescription</MudTd>
+    <MudTd DataLabel="ItemType">@context.ItemType</MudTd>
+    <MudTd DataLabel="ItemValue">@context.ItemValue</MudTd>
+    <MudTd DataLabel="ExtraDetails">@context.ExtraDetails</MudTd>
+    <MudTd DataLabel="Status">@context.Status</MudTd>
+    <MudTd DataLabel="">
+      <MudFab @onclick="@(()=>Edit(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
+      <MudFab @onclick="@(()=>Delete(@context.Id))" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
+    </MudTd>
+  </RowTemplate>
+</MudTable>
+
+@code{
+  private bool hover = false;
+  private string searchString = "";
+
+  private MfbDisclosureSecondPartItem spi = new MfbDisclosureSecondPartItem();
+  private List<MfbDisclosureSecondPartItem> spis = new List<MfbDisclosureSecondPartItem>();
+
+  protected override async Task OnInitializedAsync()
+  {
+    GetSecondPartItems();
+  }
+
+  private List<MfbDisclosureSecondPartItem> GetSecondPartItems()
+  {
+    spis = spiService.GetSecondPartItems();
+    return spis;
+  }
+  private bool Search(MfbDisclosureSecondPartItem spi)
+  {
+    if (string.IsNullOrWhiteSpace(searchString)) return true;
+    if (spi.ItemCode.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || spi.ItemDescription.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || spi.RegulationCode.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+    {
+      return true;
+    }
+    return false;
+  }
+
+  private void Save()
+  {
+    spiService.SaveSecondPartItem(spi);
+    spi = new MfbDisclosureSecondPartItem();
+    snackBar.Add("Second Part Item Saved.", Severity.Success);
+    GetSecondPartItems();
+  }
+  private void Edit(long id)
+  {
+    spi = spis.FirstOrDefault(c => c.Id == id);
+  }
+  private void Delete(long id)
+  {
+    spiService.DeleteSecondPartItem(id);
+    snackBar.Add("First Part Item  Deleted.", Severity.Success);
+    GetSecondPartItems();
+  }
+}

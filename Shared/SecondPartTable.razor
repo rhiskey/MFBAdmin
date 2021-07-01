@@ -1,0 +1,482 @@
+﻿@namespace MFBAdminMBlazorServer.Shared
+
+@using MFBAdminMBlazorServer.Helpers
+@using MFBAdminMBlazorServer.Models
+@inject MFBAdminMBlazorServer.Services.ISecondPartItemService spiService
+@inject ISnackbar Snackbar
+
+<MudExpansionPanels MultiExpansion="false">
+  <MudExpansionPanel>
+    <TitleContent>
+      <div class="d-flex">
+        <MudIcon Icon="@Icons.Material.Filled.Create" class="mr-3"></MudIcon>
+        <MudText>Создать</MudText>
+      </div>
+    </TitleContent>
+    <ChildContent>
+      <MudTr>
+        <MudTd><MudTextField @bind-Value="spi.RegulationCode" Label="Reg Code" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField></MudTd>
+        <MudTd><MudTextField @bind-Value="spi.ItemCode" Label="Code" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField></MudTd>
+        <MudTd><MudTextField @bind-Value="spi.ItemNumber" Label="Number" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField></MudTd>
+        <MudTd>
+          <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="Date" @bind-Date="@pDateSave" Required></MudDatePicker> @*@onchange="@((ChangeEventArgs e) => pDate = (DateTime)e.Value)" *@
+          <MudTimePicker PickerVariant="PickerVariant.Dialog" Label="Time" @bind-Time="@pTimeSave" Required /> @* Get time from DB PublishMoment.Value*@
+        </MudTd>
+        @*<MudTd><MudDatePicker @bind-Value="spi.PublishMoment" Label="PublishMoment" Variant="Variant.Outlined" Margin="Margin.Normal"></MudDatePicker></MudTd>*@
+        <MudTd>
+          <MudDatePicker @bind-Value="spi.DateFrom" Label="DateFrom" Margin="Margin.Normal" Required></MudDatePicker>
+          <MudDatePicker @bind-Value="spi.DateTo" Label="DateTo" Margin="Margin.Normal"></MudDatePicker>
+        </MudTd>
+        <MudTd><MudTextField @bind-Value="spi.Frequency" Label="Frequency" InputType="@MudBlazor.InputType.Number" Variant="Variant.Outlined" Margin="Margin.Normal"></MudTextField></MudTd>
+      </MudTr>
+      <MudTr>
+        <MudTd colspan="3">
+          <MudSelect Label="Type" @bind-Value="spi.ItemType" Variant="Variant.Outlined" HelperText="int" Dense="true" MultiSelection="false">
+            @** @bind-SelectedValues="typeOptions"*@
+            <MudSelectItem Value="@(0)" Disabled="false">0.Статическое значение или ссылка на внешний источник</MudSelectItem>
+            <MudSelectItem Value="@(1)">1.Дочерняя таблица в этом же окне</MudSelectItem>
+            <MudSelectItem Value="@(2)">2.Дочерняя динамическая таблица в отдельном окне</MudSelectItem>
+          </MudSelect>
+          @*<MudTextField @bind-Value="spi.ItemType" Label="Type" InputType="@MudBlazor.InputType.Number" Variant="Variant.Outlined" Margin="Margin.Normal"></MudTextField>*@
+        </MudTd>
+        <MudTd colspan="1">
+          <MudSelect Label="Status" @bind-Value="spi.Status" Variant="Variant.Outlined" HelperText="int" Dense="true">
+            <MudSelectItem Value="@(0)">0.Действующий показатель</MudSelectItem>
+            <MudSelectItem Value="@(1)">1.Архивный показатель</MudSelectItem>
+            <MudSelectItem Value="@(2)">2.Удаленный пункт</MudSelectItem>
+          </MudSelect>
+          @*<MudTextField @bind-Value="spi.Status" Label="Status" InputType="@MudBlazor.InputType.Number" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField>*@
+        </MudTd>
+        <MudTd>
+          <MudTextField @bind-Value="spi.Seq" Label="Seq" InputType="@MudBlazor.InputType.Number" Variant="Variant.Outlined" Margin="Margin.Normal"
+                        Validation="@(new Func<int?, IEnumerable<string>>(FieldValidation.SeqFpiCheck))"
+                        HelperText="int"
+                        Required></MudTextField>
+        </MudTd>
+        <MudTd colspan="2"><MudTextField @bind-Value="spi.ExtraDetails" Label="Extra" Variant="Variant.Outlined" Margin="Margin.Normal" HelperText="Комментарий"></MudTextField></MudTd>
+      </MudTr>
+      <MudTr>
+        <MudTd colspan="3"><MudTextField @bind-Value="spi.ItemDescription" T="string" Label="Description" Variant="Variant.Outlined" Margin="Margin.Normal" Lines="5"></MudTextField></MudTd>
+        <MudTd colspan="3"><MudTextField @bind-Value="spi.ItemValue" T="string" Label="Value" Variant="Variant.Outlined" Margin="Margin.Normal"></MudTextField></MudTd>
+      </MudTr>
+      <br />
+      <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@Save">Сохранить</MudButton>
+    </ChildContent>
+  </MudExpansionPanel>
+</MudExpansionPanels>
+
+@*<CreateSecondPart T="MfbDisclosureSecondPartItem" OnClickCallback="@Save" />*@
+<br />
+<MudTable Items="@spis"
+          Dense="@dense"
+          Hover="@hover"
+          ReadOnly="@ronly"
+          Filter="new Func<MfbDisclosureSecondPartItem, bool>(FilterFunc)"
+          @bind-SelectedItem="selectedItem"
+          SortLabel="Сортировка по"
+          CommitEditTooltip="Подтвердить редактирование"
+          OnCommitEditClick="@(()=>CommitEditClick(@selectedItem.Id))"
+          FixedHeader="@fixed_header" Height="@(fixed_header?"1000px":"")"
+          Breakpoint="Breakpoint.Lg">
+  @*Breakpoint="Breakpoint.Sm"*@
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">@TableTitle</MudText>
+    <MudToolBarSpacer />
+    <MudTextField @bind-Value="searchString" Placeholder="Поиск" Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <ColGroup>
+    <col style="width:10px;" />
+    <col style="width:10px;" />
+    <col style="width:50px;" />
+    <col style="width:40px;" />
+    <col style="width:30px;" />
+    <col style="width:30px;" />
+    <col style="width:10px;" />
+    <col style="width:20px;" />
+    <col />
+    <col style="width:10px;" />
+    <col />
+    <col />
+    <col style="width:40px;" />
+    @*<col/>*@
+  </ColGroup>
+  <HeaderContent>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.ItemCode)">Code</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.ItemNumber)">Number</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.RegulationCode)">RegUlationCode</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.PublishMoment)">PublishMoment</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.DateFrom)">DateFrom</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.DateTo)">DateTo</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.Frequency)">Frequency</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel InitialDirection="SortDirection.Ascending" SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.Seq)">Seq</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.ItemDescription)">Description</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.ItemType)">Type</MudTableSortLabel></MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.ItemValue)">Value</MudTableSortLabel></MudTh>
+    <MudTh>ExtraDetails</MudTh>
+    <MudTh><MudTableSortLabel SortBy="new Func<MfbDisclosureSecondPartItem, object>(x=>x.Status)">Status</MudTableSortLabel></MudTh>
+    @*<MudTd>Действия</MudTd>*@
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd DataLabel="ItemCode"><b>@context.ItemCode</b></MudTd>
+    <MudTd DataLabel="ItemNumber">@context.ItemNumber</MudTd>
+    <MudTd DataLabel="RegulationCode">@context.RegulationCode</MudTd>
+    <MudTd DataLabel="PublishMoment">@FieldFormatter.FormatDateTime(context.PublishMoment)</MudTd>
+    <MudTd DataLabel="DateFrom">@FieldFormatter.FormatDateTime(context.DateFrom)</MudTd>
+    <MudTd DataLabel="DateTo">@FieldFormatter.FormatDateTime(context.DateTo)</MudTd>
+    <MudTd DataLabel="Frequency">@context.Frequency</MudTd>
+    <MudTd DataLabel="Seq">@context.Seq</MudTd>
+    <MudTd DataLabel="ItemDescription">@context.ItemDescription</MudTd>
+    <MudTd DataLabel="ItemType">@context.ItemType</MudTd>
+    <MudTd DataLabel="ItemValue"><MudLink Href="@context.ItemValue">@context.ItemValue</MudLink></MudTd>
+    <MudTd DataLabel="ExtraDetails">@context.ExtraDetails</MudTd>
+    <MudTd DataLabel="Status">@context.Status</MudTd>
+    @*<MudTd></MudTd>*@
+  </RowTemplate>
+  <RowEditingTemplate>
+    <MudTd DataLabel="ItemCode">
+      <MudTextField @bind-Value="@context.ItemCode" Variant="Variant.Outlined" HelperText="Код строки (по 5452-У)" Required />
+    </MudTd>
+    <MudTd DataLabel="ItemNumber">
+      <MudTextField @bind-Value="@context.ItemNumber" Variant="Variant.Outlined" HelperText="Код строки (по 5452-У)" />
+    </MudTd>
+
+    <MudTd DataLabel="RegulationCode">
+      <MudTextField @bind-Value="@context.RegulationCode" Variant="Variant.Outlined" Required />
+    </MudTd>
+    <MudTd DataLabel="PublishMoment">
+      <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="Date" @bind-Date="@pDate" HelperText="Дата опубликования записи" Required></MudDatePicker> @*@onchange="@((ChangeEventArgs e) => pDate = (DateTime)e.Value)" *@
+      <MudTimePicker PickerVariant="PickerVariant.Dialog" Label="Time" @bind-Time="@pTime" HelperText="Время опубликования записи" Required /> @* Get time from DB PublishMoment.Value*@
+    </MudTd>
+    <MudTd DataLabel="DateFrom">
+      <MudDatePicker PickerVariant="PickerVariant.Dialog" Date="@context.DateFrom" Label="From" HelperText="Начало отчетного периода" />
+    </MudTd>
+    <MudTd DataLabel="DateTo">
+      <MudDatePicker PickerVariant="PickerVariant.Dialog" Date="@context.DateTo" Label="To" HelperText="Конец отчетного периода" />
+    </MudTd>
+    <MudTd DataLabel="Frequency">
+      <MudTextField InputType="@MudBlazor.InputType.Number" @bind-Value="@context.Frequency" Variant="Variant.Outlined" HelperText="Период расчета показателя (ежедневно, ежеквартально, ежегодно, на нерегулярной основе)" Required />
+    </MudTd>
+    <MudTd DataLabel="Seq">
+      <MudTextField InputType="@MudBlazor.InputType.Number" @bind-Value="@context.Seq" Variant="Variant.Outlined" HelperText="Сортировка - первая двойка раздел, потом три знакоместа для пункта, потом через десятку собственно нумерация" Required />
+    </MudTd>
+
+    <MudTd DataLabel="ItemDescription">
+      <MudTextField @bind-Value="@context.ItemDescription" Lines="10" Variant="Variant.Outlined" HelperText="Описание пункта указания (на сайт)" Required />
+    </MudTd>
+    <MudTd DataLabel="ItemType">
+      <MudSelect Label="ItemType" @bind-Value="@context.ItemType" Variant="Variant.Outlined" HelperText="Тип значения показателя" Dense="true">
+        <MudSelectItem Value="@(0)">0.Cтатическое значение или ссылка на внешний источник</MudSelectItem>
+        <MudSelectItem Value="@(1)">1.Дочерняя таблица в этом же окне</MudSelectItem>
+        <MudSelectItem Value="@(2)" Disabled="true">2.Дочерняя динамическая таблица в отдельном окне, в URI передаются параметры показателя</MudSelectItem>
+      </MudSelect>
+      @*<MudTextField InputType="@MudBlazor.InputType.Number" @bind-Value="@context.ItemType" Variant="Variant.Outlined" HelperText="Тип значения показателя" Required />*@
+    </MudTd>
+    <MudTd DataLabel="ItemValue">
+      <MudTextField @bind-Value="@context.ItemValue" Lines="2" Variant="Variant.Outlined" HelperText="Значение пункта указания" />
+    </MudTd>
+    <MudTd DataLabel="ExtraDetails">
+      <MudTextField @bind-Value="@context.ExtraDetails" Variant="Variant.Outlined" HelperText="Название дочерней таблицы с расширенной детализацией (если есть)" />
+    </MudTd>
+    <MudTd DataLabel="Status">
+      <MudSelect Label="Status" @bind-Value="@context.Status" Variant="Variant.Outlined" HelperText="int" Dense="true">
+        <MudSelectItem Value="@(0)" Disabled="false">0.Действующий показатель</MudSelectItem>
+        <MudSelectItem Value="@(1)">1.Архивный показатель</MudSelectItem>
+        <MudSelectItem Value="@(2)">2.Удаленный пункт</MudSelectItem>
+      </MudSelect>
+      @*<MudTextField InputType="@MudBlazor.InputType.Number" @bind-Value="@context.Status" Variant="Variant.Outlined" />*@
+    </MudTd>
+    <MudTd DataLabel="">
+      <MudFab @onclick="@(()=>Delete(@context.Id))" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
+    </MudTd>
+  </RowEditingTemplate>
+
+  <!--<ChildRowContent>
+    <MudTr>
+      <td colspan="7">
+        <MudCard Elevation="0">
+          <MudCardHeader>-->
+  @*<CardHeaderContent>
+      <MudText Typo="Typo.body1">Дочерняя таблица для <strong>@context.ItemCode</strong></MudText>
+    </CardHeaderContent>*@
+  <!--</MudCardHeader>
+  <MudCardContent Class="pa-0">
+    <MudTable Items="@context.MfbDisclosureSecondPartItemLists"
+              Context="spi"
+              Dense="@dense"
+              Hover="@hover"
+              ReadOnly="@ronly"
+              Breakpoint="Breakpoint.Sm"
+              Elevation="0"
+
+              CommitEditTooltip="Подтвердить редактирование">-->
+  @*<MudTable Items="@context.MfbDisclosureSecondPartItemLists"
+    Context="spi"
+    Dense="@dense"
+    Hover="@hover"
+    ReadOnly="@ronly"
+    Breakpoint="Breakpoint.Sm"
+    Elevation="0"
+    @bind-SelectedChildItem="selectedChildItem"
+    CommitEditTooltip="Подтвердить редактирование"
+    OnCommitEditClick="@(()=>CommitEditChildClick(context.Id))">*@
+  <!--<ColGroup>-->
+  @*<col style="width:20px;" />
+    <col style="width:40px;" />
+    <col style="width:40px;" />
+    <col style="width:40px;" />
+    <col style="width:100px;" />
+    <col style="width:100px;" />
+    <col style="width:10px;" />
+    <col style="width:10px;" />
+    <col style="width:70px;" />
+    <col style="width:60px;" />*@
+  <!--</ColGroup>
+  <HeaderContent>
+    <MudTh>Seq</MudTh>
+    <MudTh>PublishMoment</MudTh>
+    <MudTh>DateFrom</MudTh>
+    <MudTh>DateTo</MudTh>
+    <MudTh>Desc</MudTh>
+    <MudTh>Value</MudTh>
+    <MudTh>Type</MudTh>
+    <MudTh>Status</MudTh>
+    <MudTh>Category</MudTh>
+    <MudTh>Memo</MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd DataLabel="ItemDescription">@context.ItemDescription</MudTd>
+  </RowTemplate>
+  <RowEditingTemplate Context="spi">-->
+  @*<MudTd DataLabel="Id">@context.Id</MudTd>*@
+  <!--<MudTd DataLabel="ItemDescription">
+                    <MudTextField @bind-Value="@context.ItemDescription" Required />
+                  </MudTd>
+
+                </RowEditingTemplate>
+              </MudTable>
+          </MudCardContent>
+        </MudCard>
+      </td>
+    </MudTr>
+  </ChildRowContent>-->
+
+  <PagerContent>
+    <MudTablePager PageSizeOptions="new int[]{20, 50, 100}" />
+  </PagerContent>
+</MudTable>
+<MudSwitch @bind-Checked="@hover" Color="Color.Primary">Подсветка выбора</MudSwitch>
+<MudSwitch @bind-Checked="@dense" Color="Color.Secondary">Сжатие</MudSwitch>
+<MudSwitch @bind-Checked="@ronly" Color="Color.Tertiary">Только чтение</MudSwitch>
+<MudSwitch @bind-Checked="@fixed_header" Color="Color.Primary">Фиксированный размер</MudSwitch>
+<MudText Inline="true">Выбранный: @selectedItem?.Id</MudText>
+
+<div>
+  <ol>
+    <li>
+      Type - единичный или множественный. <code>
+        <br />
+        0 – статическое значение или ссылка на внешний источник;<br />
+        1 – дочерняя таблица в этом же окне;<br />
+        2 – дочерняя динамическая таблица в отдельном окне;<br />
+      </code>
+    </li>
+    <li>
+      Status (по умолчанию 0): <code>
+        <br />
+        0 - действующий показатель; <br />
+        1 - архивный показатель; <br />
+        2 - удаленный пункт
+      </code>
+    </li>
+  </ol>
+</div>
+
+@code {
+
+  [Parameter]
+  public string TableTitle { get; set; }
+
+  [Parameter]
+  public List<MfbDisclosureSecondPartItem> InputSecondPartItemsList { get; set; }
+
+  [Parameter]
+  public EventCallback<string> OnClickCallback { get; set; }
+  [CascadingParameter]
+  private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+  private HashSet<int> typeOptions { get; set; } = new HashSet<int>() { 0 };
+
+  DateTime? pDate = new DateTime();
+  TimeSpan? pTime = new TimeSpan(08, 30, 00);
+
+  DateTime? pDateSave = new DateTime();
+  TimeSpan? pTimeSave = new TimeSpan(08, 30, 00);
+
+
+  private bool dense = false;
+  private bool hover = true;
+  private bool ronly = false;
+  private bool fixed_header = true;
+  private string searchString = "";
+
+  private MfbDisclosureSecondPartItem spi = new MfbDisclosureSecondPartItem();
+  private List<MfbDisclosureSecondPartItem> spis = new List<MfbDisclosureSecondPartItem>();
+
+
+  private MfbDisclosureSecondPartItem selectedItem = null;
+  //private HashSet<Element> selectedItems = new HashSet<Element>();
+
+  private string user = null;
+
+  protected override async Task OnInitializedAsync()
+  {
+    pDate = DateTime.Now;
+    pDateSave = DateTime.Now;
+    user = GetUserName();
+    GetSecondPartItems();
+
+    //Elements = await httpClient.GetFromJsonAsync<List<Element>>("webapi/periodictable");
+  }
+
+  private List<MfbDisclosureSecondPartItem> GetSecondPartItems()
+  {
+    spis = InputSecondPartItemsList;
+    //var query = tempSpis.GroupBy(e => e.ItemCode).Select(g => g.Last()).Distinct().ToList();
+    //spis = query;
+    return spis;
+  }
+
+  private bool FilterFunc(MfbDisclosureSecondPartItem element)
+  {
+    if (string.IsNullOrWhiteSpace(searchString))
+      return true;
+    if (element.ItemCode.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+      return true;
+    if (element.ItemDescription.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+      return true;
+    return false;
+  }
+
+  private bool Search(MfbDisclosureSecondPartItem spi)
+  {
+    if (string.IsNullOrWhiteSpace(searchString)) return true;
+    if (spi.ItemCode.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || spi.ItemDescription.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || spi.RegulationCode.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+    {
+      return true;
+    }
+    return false;
+  }
+
+
+  private void Save()
+  {
+    try
+    {
+      TimeSpan _time = (TimeSpan)pTimeSave;
+
+      DateTime _date = (DateTime)pDateSave.Value.Date;
+      //spi = spiIn;
+      var pMoment = _date.Add(_time);
+      spi.PublishMoment = pMoment;
+      spi.Username = user;
+      spi.Now = DateTime.Now;
+
+      spiService.SaveSecondPartItem(spi);
+      spi = new MfbDisclosureSecondPartItem();
+      Snackbar.Add("Second Part Item Saved.", Severity.Success);
+    }
+    catch (Exception efException)
+    {
+      //spi = new MfbDisclosureSecondPartItem();
+      Snackbar.Add(efException.Message, Severity.Error);
+    }
+    finally
+    {
+      GetSecondPartItems();
+    }
+  }
+
+  //private void Save(MfbDisclosureSecondPartItem spiIn)
+  //{
+  //  TimeSpan _time = (TimeSpan)pTimeSave;
+
+  //  DateTime _date = (DateTime)pDateSave.Value.Date;
+  //  spi = spiIn;
+  //  var pMoment = _date.Add(_time);
+  //  spi.PublishMoment = pMoment;
+  //  spi.Username = user;
+  //  spi.Now = DateTime.Now;
+
+  //  spiService.SaveSecondPartItem(spi);
+  //  spi = new MfbDisclosureSecondPartItem();
+  //  Snackbar.Add("Second Part Item Saved.", Severity.Success);
+  //  GetSecondPartItems();
+  //}
+
+  private void CommitEditClick(long id)
+  {
+    Snackbar.Add("Commit Edit Invoked");
+    try
+    {
+      spi = spis.FirstOrDefault(c => c.Id == id);
+      TimeSpan _time = (TimeSpan)pTime;
+
+      DateTime _date = (DateTime)pDate.Value.Date;
+
+      var pMoment = _date.Add(_time);
+      spi.PublishMoment = pMoment;
+      spi.Username = user;
+      spi.Now = DateTime.Now;
+
+      spiService.SaveSecondPartItem(spi);
+      spi = new MfbDisclosureSecondPartItem();
+      Snackbar.Add("Second Part Item Saved.", Severity.Success);
+    }
+    catch (Exception efException)
+    {
+      //spi = new MfbDisclosureSecondPartItem();
+      Snackbar.Add(efException.Message, Severity.Error);
+    }
+    finally
+    {
+      GetSecondPartItems();
+    }
+
+    //spi = spis.FirstOrDefault(c => c.Id == id);
+  }
+  private void Delete(long id)
+  {
+    try
+    {
+      spiService.DeleteSecondPartItem(id);
+      Snackbar.Add("Second Part Item  Deleted.", Severity.Success);
+    }
+    catch (Exception efException)
+    {
+      Snackbar.Add(efException.Message, Severity.Error);
+    }
+    finally
+    {
+      GetSecondPartItems();
+    }
+  }
+
+
+  private string GetUserName()
+  {
+    var authState = authenticationStateTask;
+    var user = authState.Result.User;
+
+    if (user.Identity.IsAuthenticated)
+    {
+      return user.Identity.Name;
+    }
+    else
+    {
+      return null;
+    }
+  }
+
+}

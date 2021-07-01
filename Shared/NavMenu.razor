@@ -1,0 +1,82 @@
+﻿<div class="top-row pl-4 navbar navbar-dark">
+    <a class="navbar-brand" href="">MFBAdmin</a>
+    <button class="navbar-toggler" @onclick="ToggleNavMenu">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+</div>
+
+
+<div class="@NavMenuCssClass" @onclick="ToggleNavMenu">
+  <ul class="nav flex-column">
+    <li class="nav-item px-3">
+      <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+        <span class="oi oi-home" aria-hidden="true"></span> Главная
+      </NavLink>
+    </li>
+    @*<li class="nav-item px-3">
+      <NavLink class="nav-link" href="counter">
+        <span class="oi oi-plus" aria-hidden="true"></span> Counter
+      </NavLink>
+    </li>
+    <li class="nav-item px-3">
+      <NavLink class="nav-link" href="fetchdata">
+        <span class="oi oi-list-rich" aria-hidden="true"></span> Fetch data
+      </NavLink>
+    </li>*@
+
+
+    @*<AuthorizeView>*@
+    @* <Authorized>*@
+    <li class="nav-item px-3">
+      @*<NavLink class="nav-link" href="firstpartitem">
+        <span class="oi oi-list" aria-hidden="true"></span> 1
+      </NavLink>*@
+      <NavLink class="nav-link" href="firstpartitemrelated/true">
+        <span class="oi oi-list" aria-hidden="true"></span> 1
+      </NavLink>
+    </li>
+    @*<li class="nav-item px-3">
+      <NavLink class="nav-link" href="firstpartitemlist">
+        <span class="oi oi-list-rich" aria-hidden="true"></span> 1_child
+      </NavLink>
+    </li>*@
+    <li class="nav-item px-3">
+      @*<NavLink class="nav-link" href="secondpartitem">
+        <span class="oi oi-list" aria-hidden="true"></span> 2
+      </NavLink>*@
+      <NavLink class="nav-link" href="secondpartiteminline">
+        <span class="oi oi-list" aria-hidden="true"></span> 2
+      </NavLink>
+    </li>
+    
+
+    @*</Authorized>
+    </AuthorizeView>*@
+    <li class="nav-item px-3">
+      <AuthorizeView>
+        <Authorized>
+          <MudNavGroup Title="Редактирование" Icon="@Icons.Filled.TableRows" Expanded="true">
+            <MudNavLink Href="/firstpartitemrelated/true" Icon="@Icons.Filled.FirstPage" IconColor="Color.Success">1</MudNavLink>
+
+            <MudNavLink Href="/secondpartiteminline" Icon="@Icons.Filled.Pages" IconColor="Color.Info">
+              2            
+            </MudNavLink>
+
+          </MudNavGroup>
+        </Authorized>
+        <NotAuthorized></NotAuthorized>
+      </AuthorizeView>
+    </li>
+  </ul>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

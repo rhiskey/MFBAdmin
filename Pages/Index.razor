@@ -1,0 +1,28 @@
+﻿@page "/"
+@*@using MFBAdminMBlazorServer.Data
+  @using MFBAdminMBlazorServer.Models
+  @inject MFBAdminMBlazorServer.Services.IFirstPartItemService fpiService
+  @inject MudBlazor.ISnackbar snackBar*@
+
+@namespace MFBAdminMBlazorServer.Pages
+@*@using MFBAdminMBlazorServer.Pages*@
+
+<h1>@title</h1>
+@*<a href="https://mse.ru/ru/inform/5452-y/" target="_blank" rel="noopener noreferrer"> MSE.ru раскрытие</a>*@
+@*@desc*@
+
+<AuthorizeView>
+  <Authorized>
+    <FirstPartItemRelatedData Summary="Редактирование" CanEdit="true"> </FirstPartItemRelatedData>
+  </Authorized>
+  <NotAuthorized>
+    <FirstPartItemRelatedData Summary="Просмотр" CanEdit="false"> </FirstPartItemRelatedData>
+  </NotAuthorized>
+</AuthorizeView>
+
+@code{
+  string desc = "Добро пожаловать!";
+  string title = "Панель администратора";
+  //string summary = "Компонент для тестирования параметров";
+}
+

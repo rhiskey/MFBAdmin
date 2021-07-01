@@ -1,0 +1,87 @@
+﻿@*@namespace MainLayout*@
+
+@inherits LayoutComponentBase
+@*@layout MainLayout*@
+
+@*<div class="page">
+    <div class="sidebar">
+      <NavMenu />
+    </div>
+
+    <div class="main">
+      <div class="top-row px-4 auth">
+        <LoginDisplay />
+        <a href="https://mse.ru/ru/inform/5452-y/" target="_blank">Раскрытие</a>
+      </div>
+
+      <div class="content px-4">
+        @Body
+      </div>
+    </div>
+</div>*@
+
+<div class="page">
+  <MudLayout>
+    <MudAppBar Elevation="1" Color="Color.Default">
+      <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Inherit" Edge="Edge.Start" OnClick="@ToggleDrawer" />
+      <MudAppBarSpacer />
+      <LoginDisplay/>
+      <MudLink Href="https://mse.ru/ru/inform/5452-y/" Color="Color.Inherit" Target="_blank">Раскрытие</MudLink>
+    </MudAppBar>
+    <MudDrawer @bind-Open="@open" Elevation="1">
+      <MudDrawerHeader>
+        <MudText Typo="Typo.h6">MFB Admin</MudText>
+      </MudDrawerHeader>
+      <MudNavMenu>
+        <MudNavLink Icon="@Icons.Material.Filled.Home" Href="" Match="NavLinkMatch.All">
+          Главная
+        </MudNavLink>
+        <MudDivider />
+        <MudNavGroup Title="Редактирование" Icon="@Icons.Filled.Edit" Expanded="true">
+          <MudNavLink Icon="@Icons.Material.Filled.LooksOne" IconColor="Color.Success" Href="firstpartitemrelated/true">
+            1
+          </MudNavLink>
+          <MudNavGroup Title="2" Icon="@Icons.Filled.Expand">
+            <MudNavLink Icon="@Icons.Material.Filled.LooksTwo" Href="secondpartiteminline" IconColor="Color.Success">2</MudNavLink>
+            <MudNavLink Href="secondpartitemhistory" Icon="@Icons.Filled.Archive" IconColor="Color.Info">2 архив</MudNavLink>
+          </MudNavGroup>
+          @*<MudNavLink Icon="@Icons.Material.Filled.Menu" Href="secondpartiteminline">
+              2
+            </MudNavLink>*@
+        </MudNavGroup>
+        <AuthorizeView>
+          <Authorized>
+            <MudNavGroup Title="Редактирование" Icon="@Icons.Filled.TableRows" Expanded="true">
+              <MudNavLink Href="firstpartitemrelated/true" Icon="@Icons.Filled.FirstPage" IconColor="Color.Success">1</MudNavLink>
+              <MudNavLink Href="secondpartiteminline" Icon="@Icons.Filled.Pages" IconColor="Color.Info">2</MudNavLink>
+            </MudNavGroup>
+          </Authorized>
+          <NotAuthorized></NotAuthorized>
+        </AuthorizeView>
+        <MudNavLink Href="Help" Icon="@Icons.Material.Filled.Help" IconColor="Color.Error">Инструкция</MudNavLink>
+      </MudNavMenu>
+    </MudDrawer>
+    <MudMainContent Class="pt-16 px-16">
+      <MudContainer Class="mt-6">
+        @Body
+        @*<MudAlert Severity="Severity.Success" Class="mt-16">Text inside MudContainer</MudAlert>*@
+      </MudContainer>
+    </MudMainContent>
+  </MudLayout>
+
+  <MudScrollToTop>
+    <MudFab Color="Color.Primary" Icon="@Icons.Filled.ArrowCircleUp" />
+  </MudScrollToTop>
+
+  <MudThemeProvider />
+  <MudSnackbarProvider />
+</div>
+
+  @code{
+    bool open = true;
+
+    void ToggleDrawer()
+    {
+      open = !open;
+    }
+  }

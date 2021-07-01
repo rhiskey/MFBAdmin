@@ -1,0 +1,30 @@
+﻿<AuthorizeView>
+  <Authorized>
+    <MudChip Color="Color.Info">Здравствуйте, @context.User.Identity.Name!</MudChip>
+    @*<MudLink Href="Identity/Account/Manage" Color="Color.Success" >Здравствуйте, @context.User.Identity.Name!</MudLink>*@
+    @*<form method="post" action="Identity/Account/LogOut">*@
+      @*<MudIconButton Icon="@Icons.Material.Filled.Logout" Color="Color.Error" ButtonType="ButtonType.Submit"></MudIconButton>*@
+      @*<MudButton ButtonType="ButtonType.Submit" Color="@ColorTheme" class="nav-link btn btn-link">Выход</MudButton>*@
+    @*</form>*@
+
+    @*<a href="Identity/Account/Manage">Здравствуйте, @context.User.Identity.Name!</a>*@
+    @*<form method="post" action="Identity/Account/LogOut">
+      <button type="submit" class="nav-link btn btn-link">Выход</button>
+    </form>*@
+
+    <MudNavLink Href="Identity/Account/LogOut" Icon="@Icons.Material.Filled.Logout" IconColor="Color.Error">Выход</MudNavLink>
+
+  </Authorized>
+  <NotAuthorized>
+    @*<MudNavLink Href="Identity/Account/Register" Icon="@Icons.Material.Filled.AppRegistration" Disabled>Регистрация</MudNavLink>*@
+    <MudNavLink Href="Identity/Account/Login" Icon="@Icons.Material.Filled.Login" Disabled>Вход</MudNavLink>
+    @*<a href="Identity/Account/Register">Регистрация</a>
+    <a href="Identity/Account/Login">Вход</a>*@
+
+  </NotAuthorized>
+</AuthorizeView>
+
+@code{
+  //[Parameter]
+  //public Color ColorTheme { get; set; }
+}

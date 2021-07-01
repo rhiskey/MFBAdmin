@@ -1,0 +1,120 @@
+﻿@page "/firstpartitemlist"
+
+@using MFBAdminMBlazorServer.Models
+@inject MFBAdminMBlazorServer.Services.IFirstPartItemListService fpilService
+@inject MudBlazor.ISnackbar snackBar
+
+<h1>Подпункты первой части</h1>
+
+Управление содержимым дочерних элементов первых пунктов
+@*<SurveyPrompt Title="How is Blazor working for you?" />*@
+<MudCard Elevation="25">
+  <MudCardHeader>
+    <CardHeaderContent>
+      <MudText Typo="Typo.h6">Add / Edit First part items list</MudText>
+    </CardHeaderContent>
+  </MudCardHeader>
+  <MudCardContent>
+    <MudTextField @bind-Value="fpil.Idp" Label="Idp" InputType="@MudBlazor.InputType.Number" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="fpil.Seq" Label="Seq" InputType="@MudBlazor.InputType.Number" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+
+    <MudDatePicker @bind-Value="fpil.PublishMoment" Label="PublishMoment" Variant="Variant.Text" Margin="Margin.Normal"></MudDatePicker>
+    <MudDatePicker @bind-Value="fpil.DateFrom" Label="DateFrom" Variant="Variant.Text" Margin="Margin.Normal"></MudDatePicker>
+    <MudDatePicker @bind-Value="fpil.DateTo" Label="DateTo" Variant="Variant.Text" Margin="Margin.Normal"></MudDatePicker>
+
+    <MudTextField @bind-Value="fpil.ItemListDesc" Label="ItemListDesc" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="fpil.ItemListValue" Label="ItemListValue" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="fpil.ItemListType" Label="ItemListType" InputType="@MudBlazor.InputType.Number" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+
+    <MudTextField @bind-Value="fpil.Status" Label="Status" InputType="@MudBlazor.InputType.Number" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="fpil.ItemListCategory" Label="ItemListCategory" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <MudTextField @bind-Value="fpil.Memo" Label="Memo" Variant="Variant.Text" Margin="Margin.Normal"></MudTextField>
+    <br />
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="Save">Save First Part Item list</MudButton>
+  </MudCardContent>
+</MudCard>
+<br />
+<MudTable Elevation="25" Items="GetFirstPartItemLists()" Filter="new Func<MfbDisclosureFirstPartItemList, bool>(Search)" @bind-fpil="fpil">
+  <ToolBarContent>
+    <MudText Typo="Typo.h6">First Part Item List</MudText>
+    <MudToolBarSpacer />
+    <MudTextField @bind-Value="searchString" Placeholder="Search for First Part Item Lists..." Adornment="Adornment.Start" AdornmentIcon="@Icons.Material.Filled.Search" IconSize="Size.Medium" Class="mt-0"></MudTextField>
+  </ToolBarContent>
+  <HeaderContent>
+    <MudTh>Idp</MudTh>
+    <MudTh>Seq</MudTh>
+    <MudTh>PublishMoment</MudTh>
+    <MudTh>DateFrom</MudTh>
+    <MudTh>DateTo</MudTh>
+    <MudTh>ItemListDesc</MudTh>
+    <MudTh>ItemListValue</MudTh>
+    <MudTh>ItemListType</MudTh>
+    <MudTh>Status</MudTh>
+    <MudTh>ItemListCategory</MudTh>
+    <MudTh>Memo</MudTh>
+  </HeaderContent>
+  <RowTemplate>
+    <MudTd DataLabel="Idp">@context.Idp</MudTd>
+    <MudTd DataLabel="Seq">@context.Seq</MudTd>
+    <MudTd DataLabel="PublishMoment">@context.PublishMoment</MudTd>
+    <MudTd DataLabel="DateFrom">@context.DateFrom</MudTd>
+    <MudTd DataLabel="DateTo">@context.DateTo</MudTd>
+    <MudTd DataLabel="ItemListDesc">@context.ItemListDesc</MudTd>
+    <MudTd DataLabel="ItemListValue">@context.ItemListValue</MudTd>
+    <MudTd DataLabel="ItemListType">@context.ItemListType</MudTd>
+    <MudTd DataLabel="Status">@context.Status</MudTd>
+    <MudTd DataLabel="ItemListCategory">@context.ItemListCategory</MudTd>
+    <MudTd DataLabel="Memo">@context.Memo</MudTd>
+    <MudTd DataLabel="">
+      <MudFab @onclick="@(()=>Edit(@context.Id))" Color="Color.Primary" Icon="@Icons.Material.Filled.Edit" Size="Size.Small" IconSize="Size.Small" />
+      <MudFab @onclick="@(()=>Delete(@context.Id))" Color="Color.Secondary" Icon="@Icons.Material.Filled.Delete" Size="Size.Small" IconSize="Size.Small" />
+    </MudTd>
+  </RowTemplate>
+</MudTable>
+
+@code{
+  private bool hover = false;
+  private string searchString = "";
+
+  private MfbDisclosureFirstPartItemList fpil = new MfbDisclosureFirstPartItemList();
+  private List<MfbDisclosureFirstPartItemList> fpils = new List<MfbDisclosureFirstPartItemList>();
+
+  protected override async Task OnInitializedAsync()
+  {
+    GetFirstPartItemLists();
+  }
+
+  private List<MfbDisclosureFirstPartItemList> GetFirstPartItemLists()
+  {
+    fpils = fpilService.GetFirstPartItemLists();
+    return fpils;
+  }
+  private bool Search(MfbDisclosureFirstPartItemList fpil)
+  {
+    if (string.IsNullOrWhiteSpace(searchString)) return true;
+    if (fpil.ItemListValue.Contains(searchString, StringComparison.OrdinalIgnoreCase)
+        || fpil.ItemListDesc.Contains(searchString, StringComparison.OrdinalIgnoreCase))
+    {
+      return true;
+    }
+    return false;
+  }
+
+  private void Save()
+  {
+    fpilService.SaveFirstPartItemList(fpil);
+    fpil = new MfbDisclosureFirstPartItemList();
+    snackBar.Add("First Part Item List Saved.", Severity.Success);
+    GetFirstPartItemLists();
+  }
+  private void Edit(long id)
+  {
+    fpil = fpils.FirstOrDefault(c => c.Id == id);
+  }
+  private void Delete(long id)
+  {
+    fpilService.DeleteFirstPartItemList(id);
+    snackBar.Add("First Part Item List Deleted.", Severity.Success);
+    GetFirstPartItemLists();
+  }
+}

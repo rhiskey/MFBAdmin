@@ -1,0 +1,93 @@
+﻿@namespace MFBAdminMBlazorServer.Shared
+
+@using MFBAdminMBlazorServer.Models
+@inject MFBAdminMBlazorServer.Services.ISecondPartItemService spiService
+@inject ISnackbar Snackbar
+
+<MudCard Elevation="25">
+  <MudCardHeader>
+    <CardHeaderContent>
+      <MudText Typo="Typo.h6">Создать</MudText>
+    </CardHeaderContent>
+  </MudCardHeader>
+  <MudCardContent>
+    <MudTr>
+      <MudTd>
+        <MudDatePicker PickerVariant="PickerVariant.Dialog" Label="Date" @bind-Date="@pDateSave" Required></MudDatePicker> @*@onchange="@((ChangeEventArgs e) => pDate = (DateTime)e.Value)" *@
+        <MudTimePicker PickerVariant="PickerVariant.Dialog" Label="Time" @bind-Time="@pTimeSave" Required /> @* Get time from DB PublishMoment.Value*@
+      </MudTd>
+      @*<MudTd><MudDatePicker @bind-Value="spi.PublishMoment" Label="PublishMoment" Variant="Variant.Outlined" Margin="Margin.Normal"></MudDatePicker></MudTd>*@
+      <MudTd>
+        <MudDatePicker @bind-Value="spi.DateFrom" Label="DateFrom" Margin="Margin.Normal" Required></MudDatePicker>
+        <MudDatePicker @bind-Value="spi.DateTo" Label="DateTo" Margin="Margin.Normal"></MudDatePicker>
+      </MudTd>
+      <MudTd><MudTextField @bind-Value="spi.Frequency" Label="Frequency" InputType="@MudBlazor.InputType.Number" Variant="Variant.Outlined" Margin="Margin.Normal"></MudTextField></MudTd>
+      <MudTd><MudTextField @bind-Value="spi.Seq" Label="Seq" InputType="@MudBlazor.InputType.Number" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField></MudTd>
+      <MudTd><MudTextField @bind-Value="spi.ItemType" Label="Type" InputType="@MudBlazor.InputType.Number" Variant="Variant.Outlined" Margin="Margin.Normal"></MudTextField></MudTd>
+      <MudTd><MudTextField @bind-Value="spi.ExtraDetails" Label="Extra" Variant="Variant.Outlined" Margin="Margin.Normal"></MudTextField></MudTd>
+    </MudTr>
+    <MudTr>
+      <MudTd><MudTextField @bind-Value="spi.RegulationCode" Label="Regulation Code" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField></MudTd>
+
+      <MudTd><MudTextField @bind-Value="spi.ItemCode" Label="Code" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField></MudTd>
+      <MudTd><MudTextField @bind-Value="spi.ItemNumber" Label="Number" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField></MudTd>
+      <MudTd><MudTextField @bind-Value="spi.ItemDescription" T="string" Label="Description" Variant="Variant.Outlined" Margin="Margin.Normal" Lines="5"></MudTextField></MudTd>
+      <MudTd><MudTextField @bind-Value="spi.ItemValue" T="string" Label="Value" Variant="Variant.Outlined" Margin="Margin.Normal"></MudTextField></MudTd>
+      <MudTd><MudTextField @bind-Value="spi.Status" Label="Status" InputType="@MudBlazor.InputType.Number" Variant="Variant.Outlined" Margin="Margin.Normal" Required></MudTextField></MudTd>
+    </MudTr>
+    <br />
+    <MudButton Variant="Variant.Filled" Color="Color.Success" OnClick="@(() => SaveCallback.InvokeAsync(spi))">Сохранить</MudButton>
+  </MudCardContent>
+</MudCard>
+
+@code{ 
+  [Parameter]
+  public EventCallback<string> OnClickCallback { get; set; }
+  [Parameter]
+  public EventCallback<MfbDisclosureSecondPartItem> SaveCallback { get; set; }
+
+  //[Parameter]
+  public MfbDisclosureSecondPartItem spi = new MfbDisclosureSecondPartItem();
+  //[Parameter]
+  //public MfbDisclosureSecondPartItem T { get; set; }
+
+  [CascadingParameter]
+  private Task<AuthenticationState> authenticationStateTask { get; set; }
+
+
+  DateTime? pDate = new DateTime();
+  TimeSpan? pTime = new TimeSpan(08, 30, 00);
+
+  DateTime? pDateSave = new DateTime();
+  TimeSpan? pTimeSave = new TimeSpan(08, 30, 00);
+
+  private string user = null;
+
+  protected override async Task OnInitializedAsync()
+  {
+    pDate = DateTime.Now;
+    pDateSave = DateTime.Now;
+    user = GetUserName();
+    //GetSecondPartItems();
+
+    //Elements = await httpClient.GetFromJsonAsync<List<Element>>("webapi/periodictable");
+  }
+
+
+  private string GetUserName()
+  {
+    var authState = authenticationStateTask;
+    var user = authState.Result.User;
+
+    if (user.Identity.IsAuthenticated)
+    {
+      return user.Identity.Name;
+    }
+    else
+    {
+      return null;
+    }
+  }
+
+
+}
